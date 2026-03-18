@@ -28,23 +28,28 @@ If a command is flagged as `DANGER`, MoltLock freezes execution and pings your a
 
 ---
 
-## 📦 Installation & Setup
+## 🎮 Remote Command Center
+MoltLock provides a real-time "Heartbeat" and remote control via your Telegram Bot.
 
-### 1. Quick Start
-\`\`\`bash
-git clone https://github.com/berkmh/MoltLock.git
-cd MoltLock
-npm install
-ollama pull gemma3:270m
-\`\`\`
-
-### 2. Self-Preservation (Optional but Recommended)
-To make MoltLock "Immortal" on your Linux system, lock the core files:
-\`\`\`bash
-sudo chattr +i index.js forbidden_zones.js .env
-\`\`\`
+| Command | Action |
+| :--- | :--- |
+| `/status` | **Heartbeat Check:** Returns Uptime, RAM usage, and AI Judge status. |
+| `APPROVE` | **Manual Override:** Signs and executes a flagged command. |
+| `DENY` | **Hard Veto:** Blocks execution and logs the tamper attempt. |
 
 ---
 
-## 🛡️ License
-Distributed under the MIT License. **Secure your agents. Protect your infrastructure.**
+## 📦 Installation & Setup
+
+### 1. Quick Start
+```bash
+# Clone & Install
+git clone [https://github.com/berkmh/MoltLock.git](https://github.com/berkmh/MoltLock.git)
+cd MoltLock
+npm install
+
+# Pull the Resident Brain
+ollama pull gemma3:270m
+
+# Start the Gatekeeper
+node index.js
