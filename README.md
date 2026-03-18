@@ -44,7 +44,7 @@ MoltLock provides a real-time "Heartbeat" and remote control via your Telegram B
 ### 1. Quick Start
 ```bash
 # Clone & Install
-git clone [https://github.com/berkmh/MoltLock.git](https://github.com/berkmh/MoltLock.git)
+git clone https://github.com/berkmh/MoltLock.git
 cd MoltLock
 npm install
 
