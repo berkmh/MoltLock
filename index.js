@@ -1,11 +1,12 @@
-require('dotenv').config(); 
+require('dotenv').config();
 const { execSync } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const TelegramBot = require('node-telegram-bot-api');
-const { OpenAI } = require('openai');
+const { isForbidden } = require('./forbidden_zones'); // 🏰 The Moat
 
-// --- ANSI COLOR PALETTE ---
+// --- ANSI UI DESIGN ---
 const FgRed = "\x1b[31m";
 const FgGreen = "\x1b[32m";
 const FgYellow = "\x1b[33m";
@@ -13,27 +14,50 @@ const FgCyan = "\x1b[36m";
 const Reset = "\x1b[0m";
 const Bold = "\x1b[1m";
 
-// Pull the keys from the environment
+// --- CORE CONFIGURATION ---
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MOLTLOCK_SECRET = process.env.CLAWSIGN_SECRET; 
+const LEDGER_PATH = '../../moltlock_ledger.json';
 
-const bot = new TelegramBot(TELEGRAM_TOKEN, {polling: true});
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-console.log(`${Bold}${FgGreen}🛡️ [MoltLock] Protocol Active and Monitoring...${Reset}`);
+console.log(`${Bold}${FgGreen}🛡️ [MoltLock v0.3.0] Hybrid Protocol Active (Moat + Gemma3)${Reset}`);
 
-// The Human-in-the-Loop (HITL) Function
+/**
+ * 💓 HEARTBEAT COMMAND
+ */
+bot.onText(/\/status/, (msg) => {
+    if (msg.chat.id.toString() !== CHAT_ID) return;
+
+    const uptime = Math.round(process.uptime() / 60);
+    const freeMem = Math.round(os.freemem() / 1024 / 1024);
+    
+    const report = 
+        `✅ MOLTLOCK HEARTBEAT\n` +
+        `------------------------\n` +
+        `🕒 Uptime: ${uptime}m\n` +
+        `🧠 AI Judge: Gemma 3 270M (Resident)\n` +
+        `🏰 Moat: Active (Regex Filter)\n` +
+        `📊 RAM: ${freeMem}MB Free\n` +
+        `🛡️ Status: ARMED & ACTIVE\n` +
+        `------------------------\n` +
+        `Everything is secure, Michael.`;
+
+    bot.sendMessage(CHAT_ID, report);
+});
+/**
+ * 📱 HUMAN-IN-THE-LOOP (HITL)
+ */
 function waitForApproval(intent, command, judgeReasoning) {
     return new Promise((resolve) => {
-        const message = `🚨 MoltLock Security Alert 🚨\n\n` +
-                        `👤 Intent: ${intent}\n` +
-                        `💻 Command: ${command}\n\n` +
-                        `🧠 AI Judge Analysis: ${judgeReasoning}\n\n` +
-                        `Reply APPROVE or DENY.`;
+        const alert = `🛡️ MOLTLOCK ALERT 🛡️\n\n` +
+                      `👤 INTENT: ${intent}\n` +
+                      `💻 CMD: \`${command}\`\n\n` +
+                      `🧠 JUDGE: ${judgeReasoning}\n\n` +
+                      `Reply APPROVE or DENY.`;
 
-        bot.sendMessage(CHAT_ID, message);
+        bot.sendMessage(CHAT_ID, alert, { parse_mode: 'Markdown' });
 
         const listener = (msg) => {
             if (msg.chat.id.toString() === CHAT_ID) {
@@ -48,98 +72,97 @@ function waitForApproval(intent, command, judgeReasoning) {
     });
 }
 
-// The Semantic AI Judge
+/**
+ * 🧠 THE LOCAL JUDGE (Gemma 3 270M)
+ */
 async function analyzeIntent(intent, command) {
-    process.stdout.write(`${FgCyan}🧠 Consulting the AI Judge...${Reset}`);
+    process.stdout.write(`${FgCyan}🧠 Consulting AI Judge...${Reset}`);
     
-    const prompt = `
-    You are a Zero-Trust Security Auditor for an autonomous AI agent.
-    The user's original intent was: "${intent}"
-    The agent is attempting to execute this shell command: "${command}"
-    
-    1. Does this command strictly align with the user's intent?
-    2. Is this command destructive, exfiltrating data, or doing something unexpected?
-    
-    Respond in exactly two lines.
-    Line 1: Either "SAFE" or "DANGER"
-    Line 2: A one-sentence explanation why.
-    `;
+    const compactPrompt = `[SECURITY AUDIT] 
+Intent: "${intent}"
+Command: "${command}"
+Rule: 1. Strict alignment only. 2. Block obfuscation. 
+Format:
+Line 1: SAFE or DANGER
+Line 2: Brief reason.`;
 
-    const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.1,
-    });
+    try {
+        const response = await fetch('http://localhost:11434/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: "gemma3:270m",
+                prompt: compactPrompt,
+                stream: false,
+                keep_alive: -1,
+                options: { temperature: 0.0, num_predict: 40, num_thread: 2 }
+            })
+        });
 
-    const output = response.choices[0].message.content.split('\n');
-    console.log(` Done.`);
-    
-    return {
-        status: output[0].trim(),
-        reasoning: output[1] ? output[1].trim() : "No reasoning provided."
-    };
+        const data = await response.json();
+        const output = data.response.trim().split('\n');
+        console.log(` Done.`);
+        
+        return {
+            status: output[0].toUpperCase().includes("SAFE") ? "SAFE" : "DANGER",
+            reasoning: output[1] ? output[1].trim() : "Flagged by security heuristic."
+        };
+    } catch (error) {
+        return { status: "DANGER", reasoning: "Judge Offline: Fail-Secure Triggered." };
+    }
 }
 
 module.exports = {
     name: "secure_exec",
-    description: "Evaluates, semantically audits, and signs shell commands.",
+    description: "Evaluates, audits, and signs shell commands via Hybrid Moat/AI logic.",
     parameters: { user_intent: "string", proposed_command: "string" },
     
     async execute({ user_intent, proposed_command }, context) {
-        console.log(`\n${Bold}${FgCyan}🔒 [MoltLock] Intercepted Action...${Reset}`);
+        console.log(`\n${Bold}${FgCyan}🔒 [MoltLock] Intercepting...${Reset}`);
         
-        // 1. Run the AI Audit
-        const judge = await analyzeIntent(user_intent, proposed_command);
-        
-        // 2. Prepare Cryptographic Identity for this transaction
         const timestamp = new Date().toISOString();
         const payload = `${user_intent}:${proposed_command}:${timestamp}`;
         const signature = crypto.createHmac('sha256', MOLTLOCK_SECRET).update(payload).digest('hex');
 
-        // 3. Handle Risks
-        if (judge.status.includes("DANGER")) {
-            console.log(`${Bold}${FgRed}🚨 DANGER DETECTED: ${judge.reasoning}${Reset}`);
-            console.log(`${FgYellow}📱 Pinging authorized hardware device for signature...${Reset}`);
-            
+	// 🛡️ LAYER 1: THE MOAT (Instant Static Check)
+	if (isForbidden(proposed_command)) {
+    	const isTamper = /moltlock|index\.js|forbidden_zones\.js/i.test(proposed_command);
+    	const alertType = isTamper ? "⚠️ SELF-PRESERVATION TRIGGERED" : "🏰 MOAT BREACH";
+    
+    	console.log(`${Bold}${FgRed}${alertType}: Tamper Attempt Detected!${Reset}`);
+    	bot.sendMessage(CHAT_ID, `🚫 ${alertType}:\nAn agent attempted to modify or kill the guard:\n\`${proposed_command}\``, { parse_mode: 'Markdown' });
+    
+    	fs.appendFileSync(LEDGER_PATH, JSON.stringify({timestamp, user_intent, proposed_command, status: "TAMPER_VETO"}) + '\n');
+    	return `CRITICAL BLOCK: ${alertType}. Your attempt to bypass security has been logged.`;	
+	}
+
+        // 🧠 LAYER 2: THE JUDGE (Semantic Check)
+        const judge = await analyzeIntent(user_intent, proposed_command);
+        
+        // 📱 LAYER 3: HUMAN-IN-THE-LOOP (HITL)
+        if (judge.status !== "SAFE") {
+            console.log(`${Bold}${FgRed}🚨 DANGER: ${judge.reasoning}${Reset}`);
             const isApproved = await waitForApproval(user_intent, proposed_command, judge.reasoning);
             
             if (!isApproved) {
-                console.log(`${Bold}${FgRed}🔒 [MoltLock] ACTION TERMINATED BY USER VETO.${Reset}`);
-                
-                // FORENSIC RECORD: Log the blocked attempt
-                const vetoEntry = { 
-                    timestamp, user_intent, proposed_command, 
-                    judge_reasoning: judge.reasoning, 
-                    signature, status: "VETOED" 
-                };
-                fs.appendFileSync('../../moltlock_ledger.json', JSON.stringify(vetoEntry) + '\n');
-                
-                return "ACTION BLOCKED BY MOLTLOCK: Physical User Veto applied.";
+                fs.appendFileSync(LEDGER_PATH, JSON.stringify({timestamp, user_intent, proposed_command, status: "VETOED"}) + '\n');
+                return "ACTION BLOCKED: Security Veto via Mobile.";
             }
-            console.log(`${FgGreen}✅ User APPROVED the action from Telegram. Proceeding...${Reset}`);
-        } else {
-            console.log(`${FgGreen}✅ AI Judge deemed action SAFE. Proceeding...${Reset}`);
         }
 
-        // 4. FORENSIC RECORD: Log the authorized execution
-        const logEntry = { 
-            timestamp, user_intent, proposed_command, 
-            judge_reasoning: judge.reasoning, 
-            signature, status: "EXECUTED" 
-        };
-        fs.appendFileSync('../../moltlock_ledger.json', JSON.stringify(logEntry) + '\n');
+        // 📝 LAYER 4: RECORD & EXECUTE
+        fs.appendFileSync(LEDGER_PATH, JSON.stringify({timestamp, user_intent, proposed_command, signature, status: "EXECUTED"}) + '\n');
 
-        // 5. System Execution
         try {
-            // Simulated Safety Check for common destructive commands
-            if (proposed_command.includes('rm -rf') || proposed_command.includes(':(){:|:&};:')) {
-                return `${FgYellow}[MoltLock Verified]${Reset}\n(SIMULATED EXECUTION to protect server from destructive command)`;
+            // Safety simulation for destructive commands
+            if (proposed_command.includes('rm -rf') || proposed_command.includes('mkfs')) {
+                return `[MoltLock Signed: ${signature.substring(0,8)}] (SIMULATED: Protected System)`;
             }
             
             const output = execSync(proposed_command, { encoding: 'utf-8' });
-            return `${FgGreen}[MoltLock Verified - Sig: ${signature.substring(0,8)}]${Reset}\n${output}`;
+            return `${FgGreen}[MoltLock Verified]${Reset}\n${output}`;
         } catch (error) {
-            return `${FgRed}[MoltLock] Execution Failed: ${error.message}${Reset}`;
+            return `[MoltLock] Execution Error: ${error.message}`;
         }
     }
 };
