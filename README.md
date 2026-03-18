@@ -64,4 +64,4 @@ For Web3 Protection: node web3_sentry.js
 (Run node test_web3.js to simulate intercepting a wallet drainer hack!)
 
 🛡️ License
-MIT License. Secure your agents. Protect your treasury.
+Business Source License 1.1 (Free for startups, paid for whales). Secure your agents. Protect your treasury.
