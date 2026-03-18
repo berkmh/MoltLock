@@ -1,3 +1,4 @@
+cat << 'EOF' > README.md
 # 🛡️ MoltLock v0.2.4
 ### The Zero-Trust Semantic Gatekeeper for AI Agents
 
@@ -23,7 +24,7 @@ MoltLock analyzes the **User Intent** vs. the **Proposed Command**. Using a "par
 ### 2. Physical Veto (Telegram HITL)
 If a command is flagged as `DANGER`, MoltLock freezes execution and pings your authorized mobile device. You must physically **APPROVE** or **DENY** the action. **No physical signature = No execution.**
 
-### 3. Forensic Ledger
+### 3. Cryptographic Ledger
 Every authorized action is hashed with **HMAC-SHA256** and recorded in a permanent forensic ledger (`moltlock_ledger.json`). This creates an immutable audit trail for post-incident analysis.
 
 ---
@@ -38,7 +39,7 @@ Every authorized action is hashed with **HMAC-SHA256** and recorded in a permane
 ### 2. Quick Start
 \`\`\`bash
 # Clone the repository
-git clone https://github.com/your-username/moltlock.git
+git clone https://github.com/berkmh/moltlock.git
 cd moltlock
 
 # Install dependencies
@@ -61,3 +62,4 @@ MoltLock runs as a persistent system service. You can monitor your agent's safet
 
 ## 🛡️ License
 Distributed under the MIT License. **Secure your agents. Protect your infrastructure.**
+EOF
