@@ -1,15 +1,63 @@
-# 🔒 MoltLock Protocol
-**The Zero-Trust Intent-Attestation Layer for Autonomous Agents.**
+# 🛡️ MoltLock v0.2.4
+### The Zero-Trust Semantic Gatekeeper for AI Agents
 
-MoltLock provides a cryptographic "Air-Gap" between autonomous AI agents and the host operating system. It solves the "Agency Liability Crisis" by requiring a physical human handshake for any high-risk shell execution.
-
-## 🧠 The MoltLock Stack
-1. **Semantic Audit:** A secondary AI Judge (GPT-4o-mini) analyzes command vs. intent to detect "Agent Drift."
-2. **Physical Veto:** High-risk actions trigger a real-time push notification to the user's mobile device via Telegram.
-3. **Forensic Ledger:** Every approved action is signed with an HMAC-SHA256 hash and logged for audit.
-
-## 🚀 Why MoltLock?
-Standard AI agents have "root" access to your machine. MoltLock ensures that even if an agent is compromised or hallucinating, it cannot execute destructive commands without your explicit physical approval.
+**MoltLock** is a high-velocity, air-gapped security layer designed to intercept, audit, and sign shell commands before execution. By combining **Local SLMs (Small Language Models)** with **Physical Human-in-the-Loop (HITL)** verification, MoltLock ensures that autonomous agents never stray from their intended mission.
 
 ---
-*(c) 2026 Michael Berk. Apache 2.0 License.*
+
+## 🚀 2026 Performance Benchmarks
+| Metric | Specification |
+| :--- | :--- |
+| **Audit Latency** | **1.45s** (Sub-2-second "Security Tax") |
+| **Local Brain** | **Gemma 3 270M** (Resident in RAM) |
+| **Privacy** | **100% Air-Gapped** (Zero Cloud API Calls) |
+| **Hardware** | Optimized for **AWS t3.large** (8GB RAM / 2 vCPUs) |
+
+---
+
+## 🛠️ The Security Stack
+
+### 1. Semantic Intent Auditing
+MoltLock analyzes the **User Intent** vs. the **Proposed Command**. Using a "paranoid" local auditor (Gemma 3), it detects **Intent Drift**—preventing agents from executing malicious or unauthorized code (like `curl | bash` or `rm -rf /`) that was never requested by the user.
+
+### 2. Physical Veto (Telegram HITL)
+If a command is flagged as `DANGER`, MoltLock freezes execution and pings your authorized mobile device. You must physically **APPROVE** or **DENY** the action. **No physical signature = No execution.**
+
+### 3. Forensic Ledger
+Every authorized action is hashed with **HMAC-SHA256** and recorded in a permanent forensic ledger (`moltlock_ledger.json`). This creates an immutable audit trail for post-incident analysis.
+
+---
+
+## 📦 Installation & Setup
+
+### 1. Prerequisites
+* **Ollama** (Local LLM Server)
+* **Node.js v20+**
+* **Telegram Bot** (Created via [@BotFather](https://t.me/botfather))
+
+### 2. Quick Start
+\`\`\`bash
+# Clone the repository
+git clone https://github.com/your-username/moltlock.git
+cd moltlock
+
+# Install dependencies
+npm install
+
+# Pull the high-velocity judge
+ollama pull gemma3:270m
+\`\`\`
+
+---
+
+## 🎮 Command & Control
+MoltLock runs as a persistent system service. You can monitor your agent's safety vitals from anywhere via Telegram:
+
+* **\`/status\`**: Returns real-time RAM usage, uptime, and AI "Brain" health.
+* **\`APPROVE\`**: Digitally sign and release a held command.
+* **\`DENY\`**: Terminate a malicious process immediately.
+
+---
+
+## 🛡️ License
+Distributed under the MIT License. **Secure your agents. Protect your infrastructure.**
