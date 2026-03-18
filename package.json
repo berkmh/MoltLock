@@ -1,18 +1,24 @@
 {
-  "name": "clawsign-gatekeeper",
-  "version": "1.0.0",
+  "name": "moltlock",
+  "version": "0.2.4",
+  "description": "The Zero-Trust Semantic Gatekeeper for AI Agents using Local SLMs.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "test": "node demo_test.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "security",
+    "ai-agents",
+    "slm",
+    "gemma3",
+    "ollama",
+    "zero-trust"
+  ],
+  "author": "berkmh",
+  "license": "MIT",
   "dependencies": {
-    "crypto": "^1.0.1",
-    "dotenv": "^17.3.1",
-    "node-telegram-bot-api": "^0.67.0",
-    "openai": "^6.32.0"
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }
