@@ -22,7 +22,7 @@ const LEDGER_PATH = '../../moltlock_ledger.json';
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-console.log(`${Bold}${FgGreen}🛡️ [MoltLock v0.3.0] Hybrid Protocol Active (Moat + Gemma3)${Reset}`);
+console.log(`${Bold}${FgGreen}🛡️ [MoltLock v0.3.1] Hybrid Protocol Active (Moat + Gemma3)${Reset}`);
 
 /**
  * 💓 HEARTBEAT COMMAND
