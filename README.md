@@ -44,7 +44,7 @@ The ultimate firewall for On-Chain Agents (e.g., Solana Agent Kit).
 
 ### 1. Quick Start
 ```bash
-git clone https://github.com/berkmh/MoltLock.git
+npm i moltlock
 cd MoltLock
 npm install
 ollama pull gemma3:270m
